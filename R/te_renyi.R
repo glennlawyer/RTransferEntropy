@@ -11,10 +11,10 @@ te_renyi <- function(x,
                      quantiles,
                      bins,
                      limits,
+										 yargs=NULL,
                      nboot,
                      burn,
-                     quiet,
-										 yargs=NULL
+                     quiet
 										 ) {
 
   # Code time series

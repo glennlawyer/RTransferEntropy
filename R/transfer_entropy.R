@@ -108,6 +108,7 @@ transfer_entropy <- function(x,
                              quantiles = c(5, 95),
                              bins = NULL,
                              limits = NULL,
+														 yargs = NULL,
                              nboot = 300,
                              burn = 50,
                              quiet = NULL,
@@ -188,16 +189,16 @@ transfer_entropy <- function(x,
 								 "Do not expect sensical results when using too many classes and/or lags."
 								 ))
 		}
-		if (yarg$type == "quantiles" && (min(yarg$quantiles) < 0 || max(yarg$quantiles) > 100)) {
+		if (yargs$type == "quantiles" && (min(yargs$quantiles) < 0 || max(yargs$quantiles) > 100)) {
 			stop("Yarg quantiles must be between 0 and 100")
 		}
 
-		if (yarg$type == "quantiles" && max(yarg$quantiles) <= 1) {
+		if (yargs$type == "quantiles" && max(yargs$quantiles) <= 1) {
 			warning(paste(
-										"Expected yarg quantiles between 0 and 100 but found between 0 and 1,",
+										"Expected yargs quantiles between 0 and 100 but found between 0 and 1,",
 										"multiplying by 100."
 										))
-			yarg$quantiles <- yarg$quantiles * 100
+			yargs$quantiles <- yargs$quantiles * 100
 		}
 	}
 	
