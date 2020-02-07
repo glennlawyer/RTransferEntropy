@@ -12,11 +12,17 @@ te_shannon <- function(x,
                        limits,
                        nboot,
                        burn,
-                       quiet) {
+                       quiet,
+											 yargs=NULL
+											 ) {
 
   # Code time series
   x <- code_sample(x, type, quantiles, bins, limits)
-  y <- code_sample(y, type, quantiles, bins, limits)
+	if(is.null(yargs)){
+		y <- code_sample(y, type, quantiles, bins, limits)
+	} else {
+		y <- code_sample(y, yargs$type, yargs$quantiles, yargs$bins, yargs$limits)
+	}
 
   # Lead = y
   if (!quiet) cat("  [calculate] X->Y transfer entropy\n")

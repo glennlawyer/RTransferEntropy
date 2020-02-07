@@ -38,6 +38,9 @@
 #' @param quiet if FALSE (default), the function gives feedback.
 #' @param seed a seed that seeds the PRNG (will internally just call set.seed),
 #'             default is \code{seed = NULL}.
+#' @param yargs a named list of arguments for binning the y data, where the list 
+#'              should include one/some of "type", "quantiles", "bins", "limits".
+#'              These have the same meaning as above. Ignored if not specified.
 #' @param na.rm if missing values should be removed (will remove the values at
 #'             the same point in the other series as well). Default is \code{TRUE}.
 #'
@@ -139,6 +142,7 @@ transfer_entropy <- function(x,
     }
   }
 
+
   # Check/Restrict number of classes and Markov order/lags
   if (length(quantiles) > 20 || length(bins) > 20 || length(limits) > 20) {
     stop(paste(
@@ -146,6 +150,57 @@ transfer_entropy <- function(x,
       "Do not expect sensical results when using too many classes and/or lags."
     ))
   }
+
+  # Check quantiles
+  if (type == "quantiles" && (min(quantiles) < 0 || max(quantiles) > 100)) {
+    stop("Quantiles must be between 0 and 100")
+  }
+
+  if (type == "quantiles" && max(quantiles) <= 1) {
+    warning(paste(
+      "Expected quantiles between 0 and 100 but found between 0 and 1,",
+      "multiplying by 100."
+    ))
+    quantiles <- quantiles * 100
+  }
+
+
+	# check and sanitize yargs (if specified)
+	if(! is.null(yargs)){
+		if(is.null(yargs$type)){
+			stop("if you specify yargs you must specify a type (q, b, or l).")
+		}
+		if (!tolower(yargs$type) %in% c("quantiles", "bins", "limits", "q", "b", "l")) {
+			stop("yargs type must be either 'quantiles', 'bins' or 'limits'.")
+		}
+		if (nchar(yargs$type) == 1) {
+			if (yargs$type == "q") {
+				yargs$type <- "quantiles"
+			} else if (yargs$type == "b") {
+				yargs$type <- "bins"
+			} else {
+				yargs$type <- "limits"
+			}
+		}
+		if (length(yargs$quantiles) > 20 || length(yargs$bins) > 20 || length(yargs$limits) > 20) {
+			stop(paste(
+								 "Number of classes in yarg should not exceed 20.",
+								 "Do not expect sensical results when using too many classes and/or lags."
+								 ))
+		}
+		if (yarg$type == "quantiles" && (min(yarg$quantiles) < 0 || max(yarg$quantiles) > 100)) {
+			stop("Yarg quantiles must be between 0 and 100")
+		}
+
+		if (yarg$type == "quantiles" && max(yarg$quantiles) <= 1) {
+			warning(paste(
+										"Expected yarg quantiles between 0 and 100 but found between 0 and 1,",
+										"multiplying by 100."
+										))
+			yarg$quantiles <- yarg$quantiles * 100
+		}
+	}
+	
 
   if (lx > 20 || ly > 20) {
     stop(paste(
@@ -186,18 +241,6 @@ transfer_entropy <- function(x,
     }
   }
 
-  # Check quantiles
-  if (type == "quantiles" && (min(quantiles) < 0 || max(quantiles) > 100)) {
-    stop("Quantiles must be between 0 and 100")
-  }
-
-  if (type == "quantiles" && max(quantiles) <= 1) {
-    warning(paste(
-      "Expected quantiles between 0 and 100 but found between 0 and 1,",
-      "multiplying by 100."
-    ))
-    quantiles <- quantiles * 100
-  }
 
   # Check number of bootstrap replications
   if (nboot > 0 && nboot < 100) {
@@ -248,7 +291,8 @@ transfer_entropy <- function(x,
       limits = limits,
       nboot = nboot,
       burn = burn,
-      quiet = quiet
+      quiet = quiet,
+			yargs = yargs
     )
   } else {
     te <- te_renyi(
@@ -264,7 +308,8 @@ transfer_entropy <- function(x,
       limits = limits,
       nboot = nboot,
       burn = burn,
-      quiet = quiet
+      quiet = quiet,
+			yargs = yargs
     )
   }
 
